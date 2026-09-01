@@ -5,8 +5,8 @@ window.MENU_DATA = {
     "slogan": "O sabor é bruto, a fome não tem chance!",
     "logo": "icons/icon-512.png",
     "bannerTexto": "COMBO ESQUADRÃO · a partir de R$ 63,90",
-    "bannerImagem": "",
-    "bannerImagemAlt": "",
+    "bannerImagem": "img/promo/banner-brutus-premium.webp",
+    "bannerImagemAlt": "Hambúrguer artesanal Brutu's com bacon e cheddar",
     "whatsapp": "5516993319742",
     "pix": {
       "chave": "",
@@ -293,7 +293,7 @@ window.MENU_DATA = {
       "categoria": "hamburgueres-gourmet",
       "nome": "Brutu's Bacon",
       "descricao": "Pão, hambúrguer, cheddar cremoso, bacon crocante e molho especial.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+Bacon",
+      "foto": "img/produtos/brutus-bacon.webp",
       "preco": 30.9,
       "ingredientes": [
         "Pão",
@@ -316,7 +316,7 @@ window.MENU_DATA = {
       "categoria": "hamburgueres-gourmet",
       "nome": "Brutu's Cheddar Duplo",
       "descricao": "Dois hambúrgueres, muito cheddar, cebola caramelizada e bacon.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+Cheddar+Duplo",
+      "foto": "img/produtos/brutus-cheddar-duplo.webp",
       "preco": 35.9,
       "ingredientes": [
         "Pão",
@@ -414,7 +414,7 @@ window.MENU_DATA = {
       "categoria": "hamburgueres-gourmet",
       "nome": "Brutu's Raiz",
       "descricao": "Hambúrguer, catupiry, ovo, presunto, alface, tomate e molho da casa.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+Raiz",
+      "foto": "img/produtos/brutus-raiz.webp",
       "preco": 35.9,
       "ingredientes": [
         "Pão",
@@ -440,7 +440,7 @@ window.MENU_DATA = {
       "categoria": "hamburgueres-gourmet",
       "nome": "X Burguer Brutus",
       "descricao": "Pão, hambúrguer e queijo.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=X+Burguer",
+      "foto": "img/produtos/x-burguer-brutus.webp",
       "preco": 23.9,
       "ingredientes": [
         "Pão",
@@ -461,7 +461,7 @@ window.MENU_DATA = {
       "categoria": "hamburgueres-gourmet",
       "nome": "BRUTU'S PICKLES",
       "descricao": "Pão macio, hambúrguer artesanal, cheddar cremoso, cebola roxa, picles crocantes e molho especial de picles.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=BRUTUS+PICKLES",
+      "foto": "img/produtos/brutus-pickles.webp",
       "preco": 38.9,
       "ingredientes": [
         "Pão macio",
@@ -508,7 +508,7 @@ window.MENU_DATA = {
       "categoria": "especiais",
       "nome": "Pappy Burger",
       "descricao": "Pão, hambúrguer, fatia de cheddar, bacon, catupiry, alface e tomate.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Pappy+Burger",
+      "foto": "img/produtos/pappy-burger.webp",
       "preco": 29.99,
       "ingredientes": [
         "Pão",
@@ -564,7 +564,7 @@ window.MENU_DATA = {
       "categoria": "especiais",
       "nome": "Brutus na Chapa",
       "descricao": "Pão, salsicha, bacon, batata palha, molho da casa, ovo, presunto, muçarela, alface e tomate.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+na+Chapa",
+      "foto": "img/produtos/brutus-na-chapa.webp",
       "preco": 27,
       "ingredientes": [
         "Pão",
@@ -622,7 +622,7 @@ window.MENU_DATA = {
       "categoria": "especiais",
       "nome": "Bruto Power",
       "descricao": "Pão, hambúrguer, bacon, muçarela, catupiry, cebola roxa, tomate, rúcula e molho da casa.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Bruto+Power",
+      "foto": "img/produtos/bruto-power.webp",
       "preco": 27.99,
       "ingredientes": [
         "Pão",
@@ -1217,7 +1217,7 @@ window.MENU_DATA = {
       "categoria": "hamburgueres-gourmet",
       "nome": "Brutus Prime",
       "descricao": "Pão, hambúrguer, muçarela, catupiry, cebola caramelizada, tomate e rúcula.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+Prime",
+      "foto": "img/produtos/brutus-prime.webp",
       "preco": 27.99,
       "ingredientes": [
         "Pão",

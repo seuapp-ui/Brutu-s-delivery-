@@ -417,6 +417,18 @@
     $("#restaurante-tempo").textContent = r.tempoEstimado || "";
     document.title = `${r.nome} — Cardápio`;
 
+    const telefoneDigitos = String(r.whatsapp || "").replace(/\D/g, "");
+    const telefoneFormatado = telefoneDigitos.length === 13
+      ? `(${telefoneDigitos.slice(2, 4)}) ${telefoneDigitos.slice(4, 9)}-${telefoneDigitos.slice(9)}`
+      : (r.whatsapp || "");
+    const enderecoRetirada = r.enderecoRetirada || "Consulte o endereço de retirada";
+    $("#footer-endereco").textContent = enderecoRetirada;
+    $("#footer-mapa").href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoRetirada)}`;
+    $("#footer-telefone").textContent = telefoneFormatado;
+    $("#footer-whatsapp").href = telefoneDigitos ? `https://wa.me/${telefoneDigitos}` : "#";
+    $("#footer-horario").textContent = r.horario?.abre && r.horario?.fecha
+      ? `${r.horario.abre} às ${r.horario.fecha}` : "Consulte o horário";
+
     $("#hero-title").textContent = r.nome;
     $("#hero-slogan").textContent = r.slogan || "";
     $("#hero-slogan").classList.toggle("hidden", !r.slogan);
@@ -556,6 +568,9 @@
     // Tocar no resto do card continua abrindo o modal completo (útil se o
     // cliente quiser deixar uma observação, mesmo sem adicionais).
     const semAdicionais = !(produto.adicionais && produto.adicionais.length);
+    const informacaoCombo = produto.qtdLanches > 1
+      ? `Serve ${produto.qtdLanches} pessoas`
+      : (produto.categoria === "combos" ? "Combo individual" : "");
 
     // Usamos <div role="button"> em vez de <button> porque o botão de
     // adição rápida também precisa ser um <button> — e a especificação de
@@ -567,13 +582,14 @@
     card.setAttribute("aria-label", `${produto.nome}, ${formatarPreco(produto.preco)}`);
     card.innerHTML = `
       <div class="product-photo">
-        ${produto.destaque ? `<span class="badge-destaque selo">TOP</span>` : ""}
+        ${produto.destaque ? `<span class="badge-destaque">Mais pedido</span>` : ""}
         ${produto.lancamento ? `<span class="badge-lancamento">🆕 Novo</span>` : ""}
         <img src="${escaparHtml(produto.foto)}" alt="${escaparHtml(produto.nome)}" loading="lazy">
       </div>
       <div class="product-info">
         <div class="product-name">${escaparHtml(produto.nome)}</div>
         <div class="product-desc">${escaparHtml(produto.descricao)}</div>
+        ${informacaoCombo ? `<div class="product-serving">🍔 ${escaparHtml(informacaoCombo)}</div>` : ""}
         <div class="product-bottom">
           <span class="product-price">${formatarPreco(produto.preco)}</span>
           ${semAdicionais
@@ -661,6 +677,12 @@
     $("#product-modal-photo").alt = produto.nome;
     $("#product-modal-title").textContent = produto.nome;
     $("#product-modal-desc").textContent = produto.descricao;
+    const metadados = [];
+    if (produto.destaque) metadados.push("🔥 Mais pedido");
+    if (produto.qtdLanches > 1) metadados.push(`🍔 Serve ${produto.qtdLanches} pessoas`);
+    else if (produto.categoria === "combos") metadados.push("🍔 Combo individual");
+    if (produto.lancamento) metadados.push("✨ Novidade");
+    $("#product-modal-meta").innerHTML = metadados.map((item) => `<span>${escaparHtml(item)}</span>`).join("");
     $("#product-obs").value = "";
 
     // Ingredientes (somente informativo)

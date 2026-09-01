@@ -1021,3 +1021,39 @@ body::before{
 @media (prefers-reduced-motion:reduce){
   html{ scroll-behavior:auto; } *,*::before,*::after{ animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important; }
 }
+
+/* =====================================================================
+   ACABAMENTO PREMIUM — v1.7.1
+   ===================================================================== */
+.hero-banner.modo-imagem{
+  min-height:230px;padding:34px 42px;display:flex;background:#120d09;isolation:isolate;overflow:hidden;
+}
+.hero-banner.modo-imagem::before{
+  content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(5,4,3,.94) 0%,rgba(5,4,3,.68) 38%,rgba(5,4,3,.08) 72%);pointer-events:none;
+}
+.hero-banner.modo-imagem .hero-glow,.hero-banner.modo-imagem .hero-mascot{ display:none; }
+.hero-banner.modo-imagem .hero-text{ display:block;position:relative;z-index:2;max-width:48%; }
+.hero-banner.modo-imagem .hero-banner-promo{ position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;border-radius:inherit; }
+.badge-destaque{
+  z-index:2;top:7px;left:7px;width:auto;height:auto;padding:4px 8px;line-height:1;border-radius:999px;transform:none;
+  background:linear-gradient(135deg,#ff5a1f,#ff9d28);color:#1a0e07;font-family:var(--font-body);font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;box-shadow:0 5px 14px rgba(0,0,0,.36);
+}
+.product-serving{ color:#f4b74a;font-size:11.5px;font-weight:700;margin-top:5px; }
+.product-modal-meta{ display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 2px; }
+.product-modal-meta:empty{ display:none; }
+.product-modal-meta span{ color:#ffd16b;background:rgba(255,177,0,.08);border:1px solid rgba(255,177,0,.2);border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800; }
+.checkout-steps{ display:flex;align-items:center;padding:8px 18px 16px;color:var(--text-faint);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em; }
+.checkout-steps span{ display:flex;align-items:center;gap:5px;white-space:nowrap; }.checkout-steps b{ width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--bg-elevated);border:1px solid var(--line);font-size:10px; }
+.checkout-steps span.active{ color:var(--text); }.checkout-steps span.active b{ background:var(--accent);border-color:var(--accent);color:#1a0e07; }
+.checkout-steps i{ height:1px;flex:1;background:var(--line);margin:0 6px; }
+.app-footer{ margin-top:44px!important;padding:28px 0 16px!important;text-align:left!important; }
+.footer-brand{ display:flex;align-items:center;gap:11px;margin-bottom:18px; }.footer-brand .selo{ width:42px;height:42px;font-size:18px;flex:none; }.footer-brand strong{ display:block;color:var(--text);font-size:17px; }.footer-brand small{ display:block;margin-top:2px;color:var(--text-faint);font-size:11px; }
+.footer-info{ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px; }.footer-info>a,.footer-info>div{ display:flex;align-items:flex-start;gap:8px;padding:12px;border:1px solid rgba(255,255,255,.07);border-radius:13px;background:rgba(255,255,255,.025);color:inherit;text-decoration:none; }.footer-info strong,.footer-info small{ display:block; }.footer-info strong{ color:var(--text-dim);font-size:11px;text-transform:uppercase; }.footer-info small{ margin-top:3px;font-size:10.5px;line-height:1.35; }.app-footer>p{ text-align:center;margin:18px 0 0;font-size:10.5px; }
+.loading-screen strong{ color:var(--text-dim);font-size:14px; }.loading-skeleton{ width:min(300px,78vw);display:grid;gap:8px; }.loading-skeleton i{ height:10px;border-radius:999px;background:linear-gradient(90deg,#18120f 20%,#2b2019 45%,#18120f 70%);background-size:220% 100%;animation:skeletonShimmer 1.2s linear infinite; }.loading-skeleton i:nth-child(2){ width:82%; }.loading-skeleton i:nth-child(3){ width:62%; }
+@keyframes skeletonShimmer{ to{ background-position:-220% 0; } }
+@keyframes cardReveal{ from{ opacity:0;transform:translateY(8px); } to{ opacity:1;transform:translateY(0); } }
+.product-card{ animation:cardReveal .34s ease both; }.cart-bar:not(.hidden){ animation:cardReveal .25s ease both; }.btn-add-mini:active{ transform:scale(.9); }
+@media (max-width:520px){
+  .hero-banner.modo-imagem{ min-height:190px;padding:22px 17px; }.hero-banner.modo-imagem .hero-text{ max-width:62%; }.hero-banner.modo-imagem .hero-banner-promo{ object-position:66% center; }.hero-banner.modo-imagem::before{ background:linear-gradient(90deg,rgba(5,4,3,.94),rgba(5,4,3,.58) 54%,rgba(5,4,3,.1)); }
+  .footer-info{ grid-template-columns:1fr; }.app-footer{ margin-top:34px!important; }.checkout-steps{ padding-left:14px;padding-right:14px; }.checkout-steps span{ font-size:9px; }
+}
