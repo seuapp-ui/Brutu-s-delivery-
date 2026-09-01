@@ -1,0 +1,18 @@
+{
+  "name": "brutus-delivery-api",
+  "version": "1.7.0",
+  "description": "API do Brutu's Delivery (Express + SQLite nativo)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "check": "node --check server.js && node --check db.js && node --check lib/regras-negocio.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
