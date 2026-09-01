@@ -64,6 +64,8 @@
     produtoEmEdicao: null,    // produto aberto no modal
     adicionaisSelecionados: [],   // array de Set — um Set por lanche (combos com vários lanches têm 1 Set por lanche)
     quantidadeModal: 1,
+    itemUidEmEdicao: null,    // item da sacola aberto para editar
+    checkoutEtapa: 1,         // 1 sacola, 2 dados, 3 revisão
     _statusInterval: null,     // setInterval do relógio "Aberto/Fechado" (já existia)
     _menuPollInterval: null,   // setInterval da verificação automática do cardápio
     _menuPollEmAndamento: false, // evita duas verificações simultâneas
@@ -667,11 +669,19 @@
   /* =====================================================================
      6. MODAL DE PRODUTO
      ===================================================================== */
-  function abrirModalProduto(produto) {
+  function abrirModalProduto(produto, itemEdicao = null) {
     state.produtoEmEdicao = produto;
+    state.itemUidEmEdicao = itemEdicao ? itemEdicao.uid : null;
+    if (itemEdicao) $("#cart-overlay")?.classList.add("hidden");
     const qtdLanches = produto.qtdLanches && produto.qtdLanches > 1 ? produto.qtdLanches : 1;
-    state.adicionaisSelecionados = Array.from({ length: qtdLanches }, () => new Set());
-    state.quantidadeModal = 1;
+    state.adicionaisSelecionados = Array.from({ length: qtdLanches }, (_, indice) => {
+      if (!itemEdicao) return new Set();
+      const grupo = itemEdicao.adicionaisPorLanche
+        ? (itemEdicao.adicionaisPorLanche[indice] || [])
+        : (indice === 0 ? (itemEdicao.adicionais || []) : []);
+      return new Set(grupo.map((adicional) => adicional.id));
+    });
+    state.quantidadeModal = itemEdicao ? itemEdicao.quantidade : 1;
 
     $("#product-modal-photo").src = produto.foto;
     $("#product-modal-photo").alt = produto.nome;
@@ -683,7 +693,7 @@
     else if (produto.categoria === "combos") metadados.push("🍔 Combo individual");
     if (produto.lancamento) metadados.push("✨ Novidade");
     $("#product-modal-meta").innerHTML = metadados.map((item) => `<span>${escaparHtml(item)}</span>`).join("");
-    $("#product-obs").value = "";
+    $("#product-obs").value = itemEdicao ? (itemEdicao.observacao || "") : "";
 
     // Ingredientes (somente informativo)
     const ingredientesWrap = $("#product-ingredientes");
@@ -805,7 +815,8 @@
       adicionaisBlock.classList.add("hidden");
     }
 
-    $("#qty-value").textContent = "1";
+    $("#qty-value").textContent = String(state.quantidadeModal);
+    $("#add-to-cart-btn").querySelector("span:first-child").textContent = itemEdicao ? "Salvar alterações" : "Adicionar";
     atualizarPrecoModal();
 
     $("#product-overlay").classList.remove("hidden");
@@ -813,8 +824,15 @@
   }
 
   function fecharModalProduto() {
+    const voltarParaSacola = Boolean(state.itemUidEmEdicao);
+    state.itemUidEmEdicao = null;
     $("#product-overlay").classList.add("hidden");
-    travarScroll(false);
+    if (voltarParaSacola) {
+      $("#cart-overlay").classList.remove("hidden");
+      travarScroll(true);
+    } else {
+      travarScroll(false);
+    }
   }
 
   function precoUnitarioModal() {
@@ -857,7 +875,7 @@
     const adicionaisEscolhidos = adicionaisPorLanche.flat(); // [{id, nome, preco}] — soma de todos os lanches
 
     const item = {
-      uid: gerarUidItem(produto.id),
+      uid: state.itemUidEmEdicao || gerarUidItem(produto.id),
       produtoId: produto.id,
       nome: produto.nome,
       precoBase: produto.preco,
@@ -868,11 +886,23 @@
       observacao: $("#product-obs").value.trim(),
       quantidade: state.quantidadeModal,
     };
-    state.cart.push(item);
+    const indiceEdicao = state.itemUidEmEdicao
+      ? state.cart.findIndex((atual) => atual.uid === state.itemUidEmEdicao)
+      : -1;
+    if (indiceEdicao >= 0) state.cart.splice(indiceEdicao, 1, item);
+    else state.cart.push(item);
+    const foiEdicao = indiceEdicao >= 0;
+    state.itemUidEmEdicao = null;
     salvarCart();
     renderCartBar();
     fecharModalProduto();
-    mostrarToast(`${produto.nome} adicionado à sacola ✅`);
+    if (foiEdicao) {
+      renderCarrinho();
+      mostrarEtapaCheckout(1, false);
+      $("#cart-overlay").classList.remove("hidden");
+      travarScroll(true);
+    }
+    mostrarToast(foiEdicao ? `${produto.nome} atualizado ✅` : `${produto.nome} adicionado à sacola ✅`);
   }
 
   /* =====================================================================
@@ -1132,7 +1162,10 @@
     $("#cart-empty-view").classList.toggle("hidden", !vazio);
     $("#cart-filled-view").classList.toggle("hidden", vazio);
 
-    if (vazio) renderSugestaoUltimoPedido();
+    if (vazio) {
+      renderSugestaoUltimoPedido();
+      mostrarEtapaCheckout(1, false);
+    }
 
     const infoHorario = obterInfoHorario(state.menu.restaurante.horario);
     $("#cart-loja-fechada-aviso").classList.toggle("hidden", infoHorario.aberto);
@@ -1150,6 +1183,8 @@
     state.cart.forEach((item) => {
       const el = document.createElement("div");
       el.className = "cart-item";
+      const produtoMenu = (state.menu.produtos || []).find((produto) => produto.id === item.produtoId);
+      const fotoItem = produtoMenu?.foto || "icons/icon-192.png";
       const adicionaisTxt = item.adicionaisPorLanche
         ? item.adicionaisPorLanche
             .map((grupo, i) => (grupo.length ? `Lanche ${i + 1}: ${grupo.map((a) => escaparHtml(a.nome)).join(", ")}` : null))
@@ -1157,11 +1192,12 @@
             .join("<br>")
         : item.adicionais.map((a) => `+ ${escaparHtml(a.nome)}`).join("<br>");
       el.innerHTML = `
-        <span class="cart-item-qty">${item.quantidade}x</span>
+        <img class="cart-item-photo" src="${escaparHtml(fotoItem)}" alt="" loading="lazy">
         <div class="cart-item-info">
           <div class="cart-item-name">${escaparHtml(item.nome)}</div>
           ${adicionaisTxt ? `<div class="cart-item-addons">${adicionaisTxt}</div>` : ""}
           ${item.observacao ? `<div class="cart-item-obs">Obs: ${escaparHtml(item.observacao)}</div>` : ""}
+          ${produtoMenu ? `<button class="cart-item-edit" type="button">✏️ Editar</button>` : ""}
         </div>
         <div class="cart-item-side">
           <span class="cart-item-price">${formatarPreco(precoUnitarioItem(item) * item.quantidade)}</span>
@@ -1170,10 +1206,11 @@
             <span class="mini-qty-value">${item.quantidade}</span>
             <button class="mini-qty-btn" type="button" data-action="mais" aria-label="Aumentar quantidade de ${escaparHtml(item.nome)}">+</button>
           </div>
-          <button class="cart-item-remove" data-uid="${escaparHtml(item.uid)}" type="button">remover</button>
+          <button class="cart-item-remove" data-uid="${escaparHtml(item.uid)}" type="button">Excluir</button>
         </div>
       `;
       $(".cart-item-remove", el).addEventListener("click", () => removerDoCarrinho(item.uid));
+      $(".cart-item-edit", el)?.addEventListener("click", () => abrirModalProduto(produtoMenu, item));
       $$(".mini-qty-btn", el).forEach((btn) => {
         btn.addEventListener("click", () => {
           const delta = btn.dataset.action === "mais" ? 1 : -1;
@@ -1227,6 +1264,63 @@
     renderCartBar();
   }
 
+  function mostrarEtapaCheckout(etapa, rolar = true) {
+    const proxima = Math.max(1, Math.min(3, Number(etapa) || 1));
+    state.checkoutEtapa = proxima;
+    $$("[data-checkout-step]").forEach((painel) => {
+      painel.classList.toggle("hidden", Number(painel.dataset.checkoutStep) !== proxima);
+    });
+    $$("[data-checkout-step-target]").forEach((botao) => {
+      const numero = Number(botao.dataset.checkoutStepTarget);
+      botao.classList.toggle("active", numero === proxima);
+      botao.classList.toggle("completed", numero < proxima);
+      botao.setAttribute("aria-current", numero === proxima ? "step" : "false");
+    });
+    if (proxima === 3) renderRevisaoPedido();
+    if (rolar) $("#cart-sheet")?.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function dadosCheckoutValidos() {
+    if (!validarFormulario()) {
+      mostrarToast("Confira os campos destacados em vermelho.");
+      const primeiroInvalido = $("#checkout-form .field.invalid input, #checkout-form .field.invalid select");
+      primeiroInvalido?.focus();
+      return false;
+    }
+    const telefone = $("#input-telefone").value.replace(/\D/g, "");
+    if (telefone.length !== 10 && telefone.length !== 11) {
+      $("#input-telefone").closest(".field")?.classList.add("invalid");
+      $("#input-telefone").focus();
+      mostrarToast("Informe o WhatsApp com DDD.");
+      return false;
+    }
+    return true;
+  }
+
+  function renderRevisaoPedido() {
+    const review = $("#checkout-review");
+    if (!review) return;
+    const nome = $("#input-nome").value.trim();
+    const telefone = $("#input-telefone").value.trim();
+    const destino = state.tipoEntrega === "entrega"
+      ? `${$("#input-endereco").value.trim()}, ${$("#input-numero").value.trim()} · ${$("#input-bairro").value.trim()}`
+      : (state.menu.restaurante.enderecoRetirada || "Retirada no balcão");
+    const itens = state.cart.map((item) => `
+      <div class="review-item"><span>${item.quantidade}× ${escaparHtml(item.nome)}</span><strong>${formatarPreco(precoUnitarioItem(item) * item.quantidade)}</strong></div>
+    `).join("");
+    review.innerHTML = `
+      <div class="review-card">
+        <h3>Seu pedido</h3>${itens}
+        <div class="review-total"><span>Total</span><strong>${formatarPreco(totalCarrinho())}</strong></div>
+      </div>
+      <div class="review-grid">
+        <div class="review-card"><h3>👤 Cliente</h3><strong>${escaparHtml(nome)}</strong><small>${escaparHtml(telefone)}</small></div>
+        <div class="review-card"><h3>${state.tipoEntrega === "entrega" ? "🛵 Entrega" : "🏃 Retirada"}</h3><strong>${escaparHtml(destino)}</strong>${state.tipoEntrega === "entrega" && $("#input-referencia").value.trim() ? `<small>Referência: ${escaparHtml($("#input-referencia").value.trim())}</small>` : ""}</div>
+        <div class="review-card"><h3>💳 Pagamento</h3><strong>${escaparHtml(state.formaPagamento)}</strong>${state.formaPagamento === "Dinheiro" && $("#input-troco").value.trim() ? `<small>Pagamento: ${escaparHtml($("#input-troco").value.trim())}</small>` : ""}</div>
+      </div>
+    `;
+  }
+
   function abrirCarrinho() {
     const tel = ($("#input-telefone")?.value || "").replace(/\D/g, "");
     if (tel && window.BRUTUS_ROLETA && window.BRUTUS_ROLETA.refresh) {
@@ -1237,6 +1331,7 @@
       setTimeout(() => atualizarSecaoPremiosCheckout(), 400);
     }
     renderCarrinho();
+    mostrarEtapaCheckout(1, false);
     esconderAvisoPopupBloqueado();
     $("#cart-overlay").classList.remove("hidden");
     travarScroll(true);
@@ -2091,6 +2186,25 @@
     });
 
     $("#finalizar-btn").addEventListener("click", finalizarPedido);
+
+    $("#checkout-ir-dados")?.addEventListener("click", () => mostrarEtapaCheckout(2));
+    $("#checkout-voltar-sacola")?.addEventListener("click", () => mostrarEtapaCheckout(1));
+    $("#checkout-ir-revisao")?.addEventListener("click", () => {
+      if (dadosCheckoutValidos()) mostrarEtapaCheckout(3);
+    });
+    $("#checkout-editar-dados")?.addEventListener("click", () => mostrarEtapaCheckout(2));
+    $$("[data-checkout-step-target]").forEach((botao) => {
+      botao.addEventListener("click", () => {
+        const destino = Number(botao.dataset.checkoutStepTarget);
+        if (destino < state.checkoutEtapa) mostrarEtapaCheckout(destino);
+        else if (destino === 2) mostrarEtapaCheckout(2);
+        else if (destino === 3 && dadosCheckoutValidos()) mostrarEtapaCheckout(3);
+      });
+    });
+    $$("#checkout-form input, #checkout-form select, #checkout-form textarea").forEach((campo) => {
+      campo.addEventListener("input", () => campo.closest(".field")?.classList.remove("invalid"));
+      campo.addEventListener("change", () => campo.closest(".field")?.classList.remove("invalid"));
+    });
 
     $("#btn-aplicar-cupom")?.addEventListener("click", aplicarCupomDoInput);
     $("#input-cupom")?.addEventListener("keydown", (e) => {

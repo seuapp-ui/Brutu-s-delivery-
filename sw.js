@@ -14,7 +14,7 @@
    troque o número da versão abaixo.
    ========================================================================= */
 
-const CACHE_VERSION = "brutus-v1.7.1";
+const CACHE_VERSION = "brutus-v1.7.2";
 const STATIC_CACHE = `${CACHE_VERSION}-estatico`;
 const DATA_CACHE = `${CACHE_VERSION}-dados`;
 
